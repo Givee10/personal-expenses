@@ -1,35 +1,29 @@
 package com.givee.application.views;
 
-import com.givee.application.data.User;
+import com.givee.application.entity.UserInfo;
 import com.givee.application.security.AuthenticatedUser;
 import com.givee.application.views.checkform.CheckFormView;
 import com.givee.application.views.exchangeform.ExchangeFormView;
 import com.givee.application.views.exchanges.ExchangesView;
 import com.givee.application.views.expenses.ExpensesView;
+import com.givee.application.views.person.PersonView;
 import com.givee.application.views.personform.PersonFormView;
-import com.givee.application.views.personview.PersonViewView;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.contextmenu.MenuItem;
-import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Footer;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Header;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import java.io.ByteArrayInputStream;
-import java.util.Optional;
 import org.vaadin.lineawesome.LineAwesomeIcon;
+
+import java.util.Optional;
 
 /**
  * The main view is a top-level placeholder for other views.
@@ -77,9 +71,9 @@ public class MainLayout extends AppLayout {
             nav.addItem(new SideNavItem("Expenses", ExpensesView.class, LineAwesomeIcon.FILTER_SOLID.create()));
 
         }
-        if (accessChecker.hasAccess(PersonViewView.class)) {
+        if (accessChecker.hasAccess(PersonView.class)) {
             nav.addItem(
-                    new SideNavItem("Person View", PersonViewView.class, LineAwesomeIcon.USER_FRIENDS_SOLID.create()));
+                    new SideNavItem("Person View", PersonView.class, LineAwesomeIcon.USER_FRIENDS_SOLID.create()));
 
         }
         if (accessChecker.hasAccess(CheckFormView.class)) {
@@ -107,14 +101,14 @@ public class MainLayout extends AppLayout {
     private Footer createFooter() {
         Footer layout = new Footer();
 
-        Optional<User> maybeUser = authenticatedUser.get();
+        Optional<UserInfo> maybeUser = authenticatedUser.get();
         if (maybeUser.isPresent()) {
-            User user = maybeUser.get();
+            UserInfo user = maybeUser.get();
 
-            Avatar avatar = new Avatar(user.getName());
-            StreamResource resource = new StreamResource("profile-pic",
-                    () -> new ByteArrayInputStream(user.getProfilePicture()));
-            avatar.setImageResource(resource);
+            Avatar avatar = new Avatar(user.getUsername());
+//            StreamResource resource = new StreamResource("profile-pic",
+//                    () -> new ByteArrayInputStream(user.getProfilePicture()));
+//            avatar.setImageResource(resource);
             avatar.setThemeName("xsmall");
             avatar.getElement().setAttribute("tabindex", "-1");
 
@@ -124,7 +118,7 @@ public class MainLayout extends AppLayout {
             MenuItem userName = userMenu.addItem("");
             Div div = new Div();
             div.add(avatar);
-            div.add(user.getName());
+            div.add(user.getUsername());
             div.add(new Icon("lumo", "dropdown"));
             div.getElement().getStyle().set("display", "flex");
             div.getElement().getStyle().set("align-items", "center");

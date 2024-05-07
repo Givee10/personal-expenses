@@ -1,7 +1,7 @@
 package com.givee.application.views.exchanges;
 
-import com.givee.application.data.SamplePerson;
-import com.givee.application.services.SamplePersonService;
+import com.givee.application.entity.CurrencyExchangeRate;
+import com.givee.application.repository.CurrencyExchangeRateRepository;
 import com.givee.application.views.MainLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
@@ -26,15 +26,12 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.PermitAll;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.persistence.criteria.*;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @PageTitle("Exchanges")
 @Route(value = "exchanges", layout = MainLayout.class)
@@ -42,13 +39,13 @@ import org.springframework.data.jpa.domain.Specification;
 @Uses(Icon.class)
 public class ExchangesView extends Div {
 
-    private Grid<SamplePerson> grid;
+    private Grid<CurrencyExchangeRate> grid;
 
     private Filters filters;
-    private final SamplePersonService samplePersonService;
+    private final CurrencyExchangeRateRepository currencyExchangeRateRepository;
 
-    public ExchangesView(SamplePersonService SamplePersonService) {
-        this.samplePersonService = SamplePersonService;
+    public ExchangesView(CurrencyExchangeRateRepository currencyExchangeRateRepository) {
+        this.currencyExchangeRateRepository = currencyExchangeRateRepository;
         setSizeFull();
         addClassNames("exchanges-view");
 
@@ -84,7 +81,7 @@ public class ExchangesView extends Div {
         return mobileFilters;
     }
 
-    public static class Filters extends Div implements Specification<SamplePerson> {
+    public static class Filters extends Div implements Specification<CurrencyExchangeRate> {
 
         private final TextField name = new TextField("Name");
         private final TextField phone = new TextField("Phone");
@@ -146,7 +143,7 @@ public class ExchangesView extends Div {
         }
 
         @Override
-        public Predicate toPredicate(Root<SamplePerson> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+        public Predicate toPredicate(Root<CurrencyExchangeRate> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
             List<Predicate> predicates = new ArrayList<>();
 
             if (!name.isEmpty()) {
@@ -219,18 +216,15 @@ public class ExchangesView extends Div {
     }
 
     private Component createGrid() {
-        grid = new Grid<>(SamplePerson.class, false);
-        grid.addColumn("firstName").setAutoWidth(true);
-        grid.addColumn("lastName").setAutoWidth(true);
-        grid.addColumn("email").setAutoWidth(true);
-        grid.addColumn("phone").setAutoWidth(true);
-        grid.addColumn("dateOfBirth").setAutoWidth(true);
-        grid.addColumn("occupation").setAutoWidth(true);
-        grid.addColumn("role").setAutoWidth(true);
+        grid = new Grid<>(CurrencyExchangeRate.class, false);
+        grid.addColumn(CurrencyExchangeRate::getExchangeDate).setAutoWidth(true);
+        grid.addColumn(CurrencyExchangeRate::getFromCurrency).setAutoWidth(true);
+        grid.addColumn(CurrencyExchangeRate::getToCurrency).setAutoWidth(true);
+        grid.addColumn(CurrencyExchangeRate::getRate).setAutoWidth(true);
 
-        grid.setItems(query -> samplePersonService.list(
-                PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)),
-                filters).stream());
+        grid.setItems(query -> currencyExchangeRateRepository.findAll(filters,
+                PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query))
+        ).stream());
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
         grid.addClassNames(LumoUtility.Border.TOP, LumoUtility.BorderColor.CONTRAST_10);
 

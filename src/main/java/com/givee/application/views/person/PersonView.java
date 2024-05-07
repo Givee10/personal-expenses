@@ -1,7 +1,7 @@
-package com.givee.application.views.expenses;
+package com.givee.application.views.person;
 
-import com.givee.application.entity.UserExchange;
-import com.givee.application.repository.UserExchangeRepository;
+import com.givee.application.entity.UserInfo;
+import com.givee.application.repository.UserInfoRepository;
 import com.givee.application.views.MainLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
@@ -23,10 +23,9 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.persistence.criteria.*;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -34,24 +33,23 @@ import org.springframework.data.jpa.domain.Specification;
 import java.util.ArrayList;
 import java.util.List;
 
-@PageTitle("Expenses")
-@Route(value = "", layout = MainLayout.class)
-@RouteAlias(value = "", layout = MainLayout.class)
-@PermitAll
+@PageTitle("Person View")
+@Route(value = "person-view", layout = MainLayout.class)
+@RolesAllowed("ADMIN")
 @Uses(Icon.class)
-public class ExpensesView extends Div {
+public class PersonView extends Div {
 
-    private Grid<UserExchange> grid;
+    private Grid<UserInfo> grid;
 
     private Filters filters;
-    private final UserExchangeRepository userExchangeRepository;
+    private final UserInfoRepository userInfoRepository;
 
-    public ExpensesView(UserExchangeRepository userExchangeRepository) {
-        this.userExchangeRepository = userExchangeRepository;
+    public PersonView(UserInfoRepository userInfoRepository) {
+        this.userInfoRepository = userInfoRepository;
         setSizeFull();
-        addClassNames("expenses-view");
+        addClassNames("person-view-view");
 
-        filters = new Filters(this::refreshGrid);
+        filters = new Filters(() -> refreshGrid());
         VerticalLayout layout = new VerticalLayout(createMobileFilters(), filters, createGrid());
         layout.setSizeFull();
         layout.setPadding(false);
@@ -83,7 +81,7 @@ public class ExpensesView extends Div {
         return mobileFilters;
     }
 
-    public static class Filters extends Div implements Specification<UserExchange> {
+    public static class Filters extends Div implements Specification<UserInfo> {
 
         private final TextField name = new TextField("Name");
         private final TextField phone = new TextField("Phone");
@@ -145,7 +143,7 @@ public class ExpensesView extends Div {
         }
 
         @Override
-        public Predicate toPredicate(Root<UserExchange> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+        public Predicate toPredicate(Root<UserInfo> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
             List<Predicate> predicates = new ArrayList<>();
 
             if (!name.isEmpty()) {
@@ -218,15 +216,16 @@ public class ExpensesView extends Div {
     }
 
     private Component createGrid() {
-        grid = new Grid<>(UserExchange.class, false);
-        grid.addColumn(UserExchange::getExchangeDate).setAutoWidth(true);
-        grid.addColumn(UserExchange::getFromCurrency).setAutoWidth(true);
-        grid.addColumn(UserExchange::getFromAmount).setAutoWidth(true);
-        grid.addColumn(UserExchange::getToCurrency).setAutoWidth(true);
-        grid.addColumn(UserExchange::getToAmount).setAutoWidth(true);
-        grid.addColumn(UserExchange::getNotes).setAutoWidth(true);
+        grid = new Grid<>(UserInfo.class, false);
+        grid.addColumn("firstName").setAutoWidth(true);
+        grid.addColumn("lastName").setAutoWidth(true);
+        grid.addColumn("email").setAutoWidth(true);
+        grid.addColumn("phone").setAutoWidth(true);
+        grid.addColumn("dateOfBirth").setAutoWidth(true);
+        grid.addColumn("occupation").setAutoWidth(true);
+        grid.addColumn("role").setAutoWidth(true);
 
-        grid.setItems(query -> userExchangeRepository.findAll(filters,
+        grid.setItems(query -> userInfoRepository.findAll(filters,
                 PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query))
         ).stream());
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);

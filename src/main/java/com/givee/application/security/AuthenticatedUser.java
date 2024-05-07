@@ -1,28 +1,25 @@
 package com.givee.application.security;
 
-import com.givee.application.data.User;
-import com.givee.application.data.UserRepository;
+import com.givee.application.entity.UserInfo;
+import com.givee.application.repository.UserInfoRepository;
 import com.vaadin.flow.spring.security.AuthenticationContext;
-import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Component
-public class AuthenticatedUser {
+import java.util.Optional;
 
-    private final UserRepository userRepository;
+@Component
+@RequiredArgsConstructor
+public class AuthenticatedUser {
+    private final UserInfoRepository userRepository;
     private final AuthenticationContext authenticationContext;
 
-    public AuthenticatedUser(AuthenticationContext authenticationContext, UserRepository userRepository) {
-        this.userRepository = userRepository;
-        this.authenticationContext = authenticationContext;
-    }
-
     @Transactional
-    public Optional<User> get() {
+    public Optional<UserInfo> get() {
         return authenticationContext.getAuthenticatedUser(UserDetails.class)
-                .map(userDetails -> userRepository.findByUsername(userDetails.getUsername()));
+                .map(userDetails -> userRepository.findByUsernameIgnoreCase(userDetails.getUsername()));
     }
 
     public void logout() {
