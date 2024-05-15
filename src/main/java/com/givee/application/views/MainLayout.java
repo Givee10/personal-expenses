@@ -69,30 +69,21 @@ public class MainLayout extends AppLayout {
 
         if (accessChecker.hasAccess(ExpensesView.class)) {
             nav.addItem(new SideNavItem("Expenses", ExpensesView.class, LineAwesomeIcon.FILTER_SOLID.create()));
-
         }
         if (accessChecker.hasAccess(PersonView.class)) {
-            nav.addItem(
-                    new SideNavItem("Person View", PersonView.class, LineAwesomeIcon.USER_FRIENDS_SOLID.create()));
-
+            nav.addItem(new SideNavItem("Person View", PersonView.class, LineAwesomeIcon.USER_FRIENDS_SOLID.create()));
         }
         if (accessChecker.hasAccess(CheckFormView.class)) {
             nav.addItem(new SideNavItem("Check Form", CheckFormView.class, LineAwesomeIcon.PEN_ALT_SOLID.create()));
-
         }
         if (accessChecker.hasAccess(PersonFormView.class)) {
             nav.addItem(new SideNavItem("Person Form", PersonFormView.class, LineAwesomeIcon.USER.create()));
-
         }
         if (accessChecker.hasAccess(ExchangesView.class)) {
-            nav.addItem(
-                    new SideNavItem("Exchanges", ExchangesView.class, LineAwesomeIcon.MONEY_BILL_WAVE_SOLID.create()));
-
+            nav.addItem(new SideNavItem("Exchanges", ExchangesView.class, LineAwesomeIcon.MONEY_BILL_WAVE_SOLID.create()));
         }
         if (accessChecker.hasAccess(ExchangeFormView.class)) {
-            nav.addItem(new SideNavItem("Exchange Form", ExchangeFormView.class,
-                    LineAwesomeIcon.MONEY_BILL_SOLID.create()));
-
+            nav.addItem(new SideNavItem("Exchange Form", ExchangeFormView.class, LineAwesomeIcon.MONEY_BILL_SOLID.create()));
         }
 
         return nav;

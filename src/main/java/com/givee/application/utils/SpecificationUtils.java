@@ -2,6 +2,7 @@ package com.givee.application.utils;
 
 import com.givee.application.entity.Currency;
 import com.givee.application.entity.CurrencyExchangeRate;
+import com.givee.application.entity.UserInfo;
 import jakarta.persistence.criteria.*;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
@@ -18,6 +19,10 @@ public class SpecificationUtils {
     public static final String EXCHANGE_DATE = "exchangeDate";
     public static final String CODE = "code";
     public static final String ENABLED = "enabled";
+    public static final String USERNAME = "username";
+    public static final String EMAIL = "email";
+    public static final String FIRST_NAME = "firstName";
+    public static final String LAST_NAME = "lastName";
 
     public static Specification<CurrencyExchangeRate> filterCurrencyExchangeRates(
             String fromCode, List<String> toCode, LocalDate startDate, LocalDate endDate) {
@@ -65,5 +70,34 @@ public class SpecificationUtils {
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
+    }
+
+    public static Specification<UserInfo> filterUserInfo(String username, String email, String lastName, String firstName, Boolean enabled) {
+        return (Root<UserInfo> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // Add filtering criteria based on provided parameters
+            if (StringUtils.isNotBlank(username)) {
+                predicates.add(likeIgnoreCase(criteriaBuilder, root.get(USERNAME), username));
+            }
+            if (StringUtils.isNotBlank(lastName)) {
+                predicates.add(likeIgnoreCase(criteriaBuilder, root.get(LAST_NAME), lastName));
+            }
+            if (StringUtils.isNotBlank(firstName)) {
+                predicates.add(likeIgnoreCase(criteriaBuilder, root.get(FIRST_NAME), firstName));
+            }
+            if (StringUtils.isNotBlank(email)) {
+                predicates.add(likeIgnoreCase(criteriaBuilder, root.get(EMAIL), email));
+            }
+            if (enabled != null) {
+                predicates.add(criteriaBuilder.equal(root.get(ENABLED), enabled));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    private static Predicate likeIgnoreCase(CriteriaBuilder criteriaBuilder, Path<String> path, String value) {
+        return criteriaBuilder.like(criteriaBuilder.lower(path), value.toLowerCase());
     }
 }

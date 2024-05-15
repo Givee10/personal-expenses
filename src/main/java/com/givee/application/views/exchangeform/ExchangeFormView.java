@@ -56,10 +56,8 @@ public class ExchangeFormView extends Composite<VerticalLayout> {
         textField3.setWidth("min-content");
         select.setLabel("From currency");
         select.setWidth("min-content");
-        setSelectSampleData(select);
         select2.setLabel("To currency");
         select2.setWidth("min-content");
-        setSelectSampleData(select2);
         layoutRow.setWidthFull();
         layoutColumn2.setFlexGrow(1.0, layoutRow);
         layoutRow.addClassName(Gap.MEDIUM);
@@ -81,18 +79,5 @@ public class ExchangeFormView extends Composite<VerticalLayout> {
         layoutColumn2.add(layoutRow);
         layoutRow.add(buttonPrimary);
         layoutRow.add(buttonSecondary);
-    }
-
-    record SampleItem(String value, String label, Boolean disabled) {
-    }
-
-    private void setSelectSampleData(Select select) {
-        List<SampleItem> sampleItems = new ArrayList<>();
-        sampleItems.add(new SampleItem("state1", "State 1", null));
-        sampleItems.add(new SampleItem("state2", "State 2", null));
-        sampleItems.add(new SampleItem("state3", "State 3", null));
-        select.setItems(sampleItems);
-        select.setItemLabelGenerator(item -> ((SampleItem) item).label());
-        select.setItemEnabledProvider(item -> !Boolean.TRUE.equals(((SampleItem) item).disabled()));
     }
 }
