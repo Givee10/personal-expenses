@@ -1,4 +1,4 @@
-name: Build and Deploy Docker Image
+name: Build and Deploy Docker Images
 
 on:
   push:
@@ -13,6 +13,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '17'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven
+
+      - name: Build Maven project
+        run: mvn clean install
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
@@ -22,16 +38,27 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build Docker image
+      - name: Build Docker image for wallet-server
         run: |
-          docker build -t givee10/personal-wallet:latest .
-          docker tag givee10/personal-wallet:latest givee10/personal-wallet:latest
+          cd wallet-server
+          docker build -t givee10/personal-wallet:server-latest .
+          docker tag givee10/personal-wallet:server-latest givee10/personal-wallet:server-latest
 
-      - name: Push Docker image to DockerHub
+      - name: Build Docker image for wallet-client
         run: |
-          docker push givee10/personal-wallet:latest
+          cd wallet-client
+          docker build -t givee10/personal-wallet:client-latest .
+          docker tag givee10/personal-wallet:client-latest givee10/personal-wallet:client-latest
 
-      - name: Deploy Docker image to server
+      - name: Push Docker image for wallet-server to DockerHub
+        run: |
+          docker push givee10/personal-wallet:server-latest
+
+      - name: Push Docker image for wallet-client to DockerHub
+        run: |
+          docker push givee10/personal-wallet:client-latest
+
+      - name: Deploy Docker images to server
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           SERVER_USER: ${{ secrets.SERVER_USER }}
@@ -41,6 +68,7 @@ jobs:
           chmod 600 private_key
           scp -i private_key -o StrictHostKeyChecking=no docker-compose.yml $SERVER_USER@$SERVER_IP:/opt/docker/
           ssh -i private_key -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP << 'EOF'
-          docker pull givee10/personal-wallet:latest
+          docker pull givee10/personal-wallet:server-latest
+          docker pull givee10/personal-wallet:client-latest
           docker-compose -f /opt/docker/docker-compose.yml up -d
           EOF
